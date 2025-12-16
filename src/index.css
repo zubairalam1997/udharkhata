@@ -1,0 +1,55 @@
+
+/* Handwriting font example: use a Google Font or local font */
+
+@import url('https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Homemade+Apple&family=Shadows+Into+Light&display=swap');
+@import "tailwindcss";
+.font-handwriting {
+  font-family: 'Shadows Into Light', 'Homemade Apple', cursive;
+}
+
+.font-hand {
+  font-family: 'Patrick Hand', cursive;
+}
+
+/* Notebook page background: soft beige + ruled lines */
+.notebook-page {
+  background:
+    linear-gradient(#0000 31px, rgba(0, 0, 0, 0.06) 32px, #0000 33px) 0 0/100% 32px,
+    linear-gradient(#0000 0, #0000 100%), /* placeholder for overlays */
+    #fbf3d0; /* soft paper */
+  position: relative;
+}
+
+/* Add pale blue horizontal lines and a red margin line using pseudo-element */
+.notebook-page::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(83, 154, 255, 0.25) 0px,
+      rgba(83, 154, 255, 0.25) 1px,
+      transparent 32px
+    );
+  pointer-events: none;
+}
+
+.notebook-page::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 42px; /* margin line position */
+  width: 2px;
+  background: rgba(255, 59, 48, 0.6);
+  pointer-events: none;
+}
+
+
+body {
+@apply bg-gray-100 text-gray-900;
+}
+
+
