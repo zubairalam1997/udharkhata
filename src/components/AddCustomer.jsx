@@ -1,93 +1,166 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-export default function AddCustomer({ onAdd }) {
+export default function AddCustomer() {
   const navigate = useNavigate();
 
-  const [form, setForm] = useState({ name: "", proprietor: "", phone: "" });
-  const [showManual, setShowManual] = useState(false);
+  const [manualMode, setManualMode] = useState(false);
+
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+
+  const [popupOpen, setPopupOpen] = useState(false);
+  const [selectedContact, setSelectedContact] = useState(null);
 
   const contacts = [
-    { name: "Ramesh Traders", proprietor: "Ramesh", phone: "9876543210" },
-    { name: "Anita Store", proprietor: "Anita", phone: "9123456780" },
-    { name: "Khan Electronics", proprietor: "Khan", phone: "9988776655" },
+    { id: 1, name: "Ramesh Kumar", phone: "9876543210" },
+    { id: 2, name: "Suresh Patel", phone: "9123456789" },
+    { id: 3, name: "Aman Verma", phone: "9988776655" },
+    { id: 4, name: "Neha Sharma", phone: "9090909090" },
+    { id: 5, name: "Rahul Traders", phone: "8899001122" },
   ];
 
-  const handleChange = (e) =>
-    setForm({ ...form, [e.target.name]: e.target.value });
+  // Hide scrollbar but allow scroll
+  const hideScrollbar =
+    "overflow-y-auto scrollbar-hide";
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!form.name || !form.proprietor || !form.phone) return;
-    onAdd(form);        // add customer to state in App.jsx
-    navigate("/");      // redirect back to Dashboard
+  const handleManualSave = () => {
+    if (!name.trim() || !/^[0-9]{10}$/.test(phone)) {
+      alert("Enter valid name and mobile number");
+      return;
+    }
+
+    console.log("Customer Added (Manual):", { name, phone });
+    navigate("/ledger-home");
+  };
+
+  const handleContactClick = (contact) => {
+    setSelectedContact(contact);
+    setName(contact.name);
+    setPopupOpen(true);
+  };
+
+  const confirmContactAdd = () => {
+    console.log("Customer Added (Contact):", {
+      name,
+      phone: selectedContact.phone,
+    });
+    navigate("/ledger-home");
   };
 
   return (
-    <div className="max-w-md mx-auto p-4 bg-white rounded shadow">
-      <h2 className="text-lg font-semibold mb-4">Add Customer</h2>
+    <div className="min-h-screen bg-[#f7e2b8] flex justify-center">
+    <div className="w-full max-w-md bg-[#fdecc8] shadow-lg relative">
 
-      {/* Toggle Manual Form */}
-      <button
-        onClick={() => setShowManual(!showManual)}
-        className="w-full mb-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-      >
-        {showManual ? "Hide Manual Form" : "Add Manually"}
-      </button>
+      {/* HEADER */}
+      <div className="px-4 py-3 border-b border-yellow-300">
+        <div className="font-hand text-lg text-[#2f5f5f]">
+          Add Customer
+        </div>
+      </div>
 
-      {showManual && (
-        <form onSubmit={handleSubmit} className="space-y-3 mb-4">
-          <input
-            type="text"
-            name="name"
-            placeholder="Shop Name"
-            value={form.name}
-            onChange={handleChange}
-            className="w-full border rounded px-3 py-2"
-          />
-          <input
-            type="text"
-            name="proprietor"
-            placeholder="Proprietor"
-            value={form.proprietor}
-            onChange={handleChange}
-            className="w-full border rounded px-3 py-2"
-          />
-          <input
-            type="tel"
-            name="phone"
-            placeholder="Phone Number"
-            value={form.phone}
-            onChange={handleChange}
-            className="w-full border rounded px-3 py-2"
-          />
+      {/* ADD MANUALLY SECTION (INITIAL STATE) */}
+      {!manualMode && (
+        <div className="p-4 border-b border-yellow-300">
           <button
-            type="submit"
-            className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700"
+            onClick={() => setManualMode(true)}
+            className="w-full border border-[#2f5f5f] text-[#2f5f5f] py-2 rounded"
           >
-            Save Customer
+            Add Manually
           </button>
-        </form>
+        </div>
       )}
 
-      {/* Contact List */}
-      <div>
-        <p className="text-sm text-gray-600 mb-2">Choose from contacts:</p>
-        <ul className="space-y-2">
-          {contacts.map((c, idx) => (
-            <li key={idx}>
+      {/* MANUAL INPUT SECTION */}
+      {manualMode && (
+        <div className="p-4 border-b border-yellow-300 relative">
+
+          {/* DROPDOWN ICON – TOP RIGHT OF INPUT FIELD */}
+          <button
+            onClick={() => setManualMode(false)}
+            className="absolute right-4 top-4 w-7 h-7 flex items-center justify-center
+                       border border-[#2f5f5f] rounded-full text-[#2f5f5f]"
+          >
+            ▾
+          </button>
+
+          {/* CUSTOMER NAME */}
+          <div className="mb-4">
+            <label className="text-sm">Customer Name</label>
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full bg-transparent border-b-2 border-[#2f5f5f] outline-none pr-10"
+            />
+          </div>
+
+          {/* MOBILE NUMBER */}
+          <div className="mb-4">
+              <label className="text-sm">Mobile Number</label>
+              <input
+                value={phone}
+                onChange={(e) =>
+                  setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))
+                }
+                className="w-full bg-transparent border-b-2 border-[#2f5f5f] outline-none"
+              />
+            </div>
+
+            <button
+              onClick={handleManualSave}
+              className="w-full bg-[#2f5f5f] text-white py-2 rounded"
+            >
+              Save Customer
+            </button>
+        </div>
+      )}
+
+        {/* CONTACT LIST */}
+        <div className="p-4">
+          <div className="text-sm mb-2 text-gray-700">
+            Select from contacts
+          </div>
+
+          <div
+            className={`max-h-64 ${hideScrollbar} border border-yellow-300 rounded`}
+            style={{ scrollbarWidth: "none" }}
+          >
+            {contacts.map((c) => (
+             <div
+             key={c.id}
+             onClick={() => handleContactClick(c)}
+             className="px-3 py-3 cursor-pointer hover:bg-yellow-100"
+           >
+             <div className="text-sm font-medium">{c.name}</div>
+             <div className="text-xs text-gray-500">{c.phone}</div>
+           
+             <div className="border-b border-[#d6b97a] mt-2" />
+           </div>
+           
+            ))}
+          </div>
+        </div>
+
+        {/* POPUP */}
+        {popupOpen && (
+          <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+            <div className="bg-[#fdecc8] p-5 rounded shadow-lg w-72">
+              <div className="text-sm mb-2">Confirm customer name</div>
+              <input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full bg-transparent border-b-2 border-[#2f5f5f] outline-none mb-4"
+              />
               <button
-                onClick={() => {
-                  onAdd(c);
-                  navigate("/");   // redirect after choosing contact
-                }}
-                className="w-full text-left px-3 py-2 border rounded hover:bg-gray-100"
+                onClick={confirmContactAdd}
+                className="w-full bg-[#2f5f5f] text-white py-2 rounded"
               >
-                {c.name} ({c.proprietor}) — {c.phone}
+                OK
               </button>
-            </li>
-          ))}
-        </ul>
+            </div>
+          </div>
+        )}
+
       </div>
     </div>
   );
