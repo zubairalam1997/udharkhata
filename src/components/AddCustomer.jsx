@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useCustomerContext } from '../context/CustomerContext';
 
-export default function AddCustomer() {
+export default function AddCustomer({ onAdd }) {
   const navigate = useNavigate();
-
+  const { customers } = useCustomerContext();
   const [manualMode, setManualMode] = useState(false);
 
   const [name, setName] = useState("");
@@ -31,6 +32,21 @@ export default function AddCustomer() {
     }
 
     console.log("Customer Added (Manual):", { name, phone });
+    const newCustomer = { id: Date.now(), name, phone: phone, amount: 0 };
+    const existingCustomer = customers.find(
+      (customer) => customer.phone === newCustomer.phone
+    );
+
+    if (existingCustomer) {
+      alert('Customer already exists. Redirecting to their ledger...');
+      console.log("Customer Added (Contact):", {
+        name,
+        phone: selectedContact.phone,
+      });
+      navigate(`/customer/${existingCustomer.id}`);
+      return;
+    }
+    onAdd(newCustomer);
     navigate("/ledger-home");
   };
 
@@ -45,6 +61,22 @@ export default function AddCustomer() {
       name,
       phone: selectedContact.phone,
     });
+    const newCustomer = { id: Date.now(), name, phone: selectedContact.phone, amount: 0 };
+    console.log("Existing Customers:", customers);
+    const existingCustomer = customers.find(
+      (customer) => customer.phone === newCustomer.phone
+    );
+
+    if (existingCustomer) {
+      alert('Customer already exists. Redirecting to their ledger...');
+      console.log("Customer Added (Contact):", {
+        name,
+        phone: selectedContact.phone,
+      });
+      navigate(`/customer/${existingCustomer.id}`);
+      return;
+    }
+    onAdd(newCustomer);
     navigate("/ledger-home");
   };
 
@@ -142,6 +174,7 @@ export default function AddCustomer() {
         </div>
 
         {/* POPUP */}
+        
         {popupOpen && (
           <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
             <div className="bg-[#fdecc8] p-5 rounded shadow-lg w-72">
@@ -151,12 +184,21 @@ export default function AddCustomer() {
                 onChange={(e) => setName(e.target.value)}
                 className="w-full bg-transparent border-b-2 border-[#2f5f5f] outline-none mb-4"
               />
+              
+              <div className="flex justify-between space-x-2">
               <button
                 onClick={confirmContactAdd}
                 className="w-full bg-[#2f5f5f] text-white py-2 rounded"
               >
                 OK
               </button>
+              <button
+                onClick={() => setPopupOpen(false)}
+                className="w-full bg-red-600 text-white py-2 rounded "
+              >
+                Cancel
+              </button>
+              </div>
             </div>
           </div>
         )}
