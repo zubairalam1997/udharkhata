@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useTransactionContext } from "../context/TransactionContext";
 
-export default function AddTransaction({ onAddTransaction }) {
+export default function AddTransaction() {
   const { state } = useLocation();
   const navigate = useNavigate();
+  const { addTransaction } = useTransactionContext();
 
   const { type, customer } = state;
 
@@ -18,6 +20,7 @@ export default function AddTransaction({ onAddTransaction }) {
     if (!amount || amount <= 0) {
       alert("Enter valid amount");
       return;
+
     }
 
     const transaction = {
@@ -27,12 +30,12 @@ export default function AddTransaction({ onAddTransaction }) {
       description: desc,
       amount:
         type === "given"
-          ? Number(amount)
-          : -Number(amount),
+          ? -Number(amount)
+          : Number(amount),
       billImage,
     };
-
-    onAddTransaction(transaction);
+    console.log("New Transaction:", transaction);
+    addTransaction(transaction);
     navigate(-1);
   };
 

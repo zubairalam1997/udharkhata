@@ -15,13 +15,12 @@ export const useCustomerContext = () => {
 // Create a provider component
 export const CustomerProvider = ({ children }) => {
   const [customers, setCustomers] = useState([]);
-
   const addCustomer = (customer) => {
     setCustomers((prevCustomers) => [...prevCustomers, customer]);
   };
-
+ 
   return (
-    <CustomerContext.Provider value={{ customers, addCustomer }}>
+    <CustomerContext.Provider value={{ customers, addCustomer  }}>
       {children}
     </CustomerContext.Provider>
   );

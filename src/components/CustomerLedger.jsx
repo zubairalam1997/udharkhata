@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
+import { useTransactionContext } from "../context/TransactionContext";
 
 export default function CustomerLedger() {
   const { id } = useParams();
@@ -8,7 +9,14 @@ export default function CustomerLedger() {
 
   const customer = location.state;
 
-  const [transactions, setTransactions] = useState([]);
+  const { transactions, addTransaction, getCustomerTotals } = useTransactionContext();
+
+  // Filter transactions for this customer
+  const customerTransactions = transactions.filter((t) => t.customerId === customer.id);
+
+  // Calculate the total balance
+  const totalBalance = customerTransactions.reduce((total, t) => total + t.amount, 0);
+  getCustomerTotals(customer.id);
 
   return (
     <div className="min-h-screen bg-[#f7e2b8] flex flex-col justify-between">
@@ -32,14 +40,26 @@ export default function CustomerLedger() {
           </div>
         </div>
 
+        {/* TOTAL BALANCE */}
+        <div className="px-4 py-3 border-b border-yellow-300">
+          <div className="text-sm text-gray-800">Total Balance:</div>
+          <div
+            className={`text-lg font-semibold ${
+              totalBalance >= 0 ? "text-green-600" : "text-red-600"
+            }`}
+          >
+            ₹{Math.abs(totalBalance)}
+          </div>
+        </div>
+
         {/* TRANSACTIONS */}
         <div className="flex-grow divide-y divide-yellow-300 px-4 py-6">
-          {transactions.length === 0 ? (
+          {customerTransactions.length === 0 ? (
             <div className="text-center text-gray-500 italic">
               "No transactions yet. Start adding entries to keep track of your ledger."
             </div>
           ) : (
-            transactions.map((t) => (
+            customerTransactions.map((t) => (
               <div
                 key={t.id}
                 className="flex justify-between py-3"
@@ -55,9 +75,7 @@ export default function CustomerLedger() {
 
                 <div
                   className={`font-semibold ${
-                    t.amount >= 0
-                      ? "text-green-600"
-                      : "text-red-600"
+                    t.amount >= 0 ? "text-green-600" : "text-red-600"
                   }`}
                 >
                   ₹{Math.abs(t.amount)}

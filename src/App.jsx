@@ -10,6 +10,8 @@ import AddTransaction from './pages/AddTransaction';
 export default function App() {
   const [user, setUser] = useState(null);
   const { addCustomer } = useCustomerContext();
+
+    const [transaction, setTransaction] = useState([]);
   
 
   return (
@@ -26,6 +28,7 @@ export default function App() {
   path="/customer/:id/add-transaction"
   element={<AddTransaction onAddTransaction={(transaction) => {
     // Add transaction logic here
+    setTransaction(transaction)
   }} />}
 />
         </>
