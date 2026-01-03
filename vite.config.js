@@ -8,5 +8,5 @@ export default defineConfig({
     // handwriting: ['"Patrick Hand"', 'cursive'],
     handwriting: ['YourHandwrittenFont', 'cursive'],
   },
-  base: "./",
+  base: "/",
 })
