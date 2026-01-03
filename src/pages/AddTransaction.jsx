@@ -1,13 +1,17 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useTransactionContext } from "../context/TransactionContext";
+import { useNotificationContext } from "../context/NotificationContext";
+import { v4 as uuid } from "uuid";
 
 export default function AddTransaction() {
   const { state } = useLocation();
   const navigate = useNavigate();
-  const { addTransaction } = useTransactionContext();
 
-  const { type, customer } = state;
+  const { addTransaction } = useTransactionContext();
+  const { pushNotification } = useNotificationContext();
+
+  const { type, customer, confirmationMode } = state;
 
   const [amount, setAmount] = useState("");
   const [desc, setDesc] = useState("");
@@ -20,22 +24,53 @@ export default function AddTransaction() {
     if (!amount || amount <= 0) {
       alert("Enter valid amount");
       return;
-
     }
+
+    const requestId = uuid();
 
     const transaction = {
       id: Date.now(),
       customerId: customer.id,
       date,
-      description: desc,
+      desc,
       amount:
         type === "given"
           ? -Number(amount)
           : Number(amount),
       billImage,
+
+      confirmationMode,
+      confirmationStatus:
+        confirmationMode === "STRICT" ? "PENDING" : "CONFIRMED",
+
+      confirmation:
+        confirmationMode === "STRICT"
+          ? {
+              requestId,
+              requestedAt: new Date().toISOString(),
+              confirmedAt: null,
+              responder: null,
+            }
+          : null,
     };
-    console.log("New Transaction:", transaction);
+
     addTransaction(transaction);
+
+    // 🔔 PUSH CONFIRMATION NOTIFICATION
+    if (confirmationMode === "STRICT") {
+      pushNotification({
+        id: requestId,
+        customerId: customer.id,
+        transactionId: transaction.id,
+        title: "Transaction Confirmation Needed",
+        message: `₹${amount} ${
+          type === "given" ? "given to" : "received from"
+        } ${customer.name}`,
+        status: "PENDING",
+        createdAt: new Date().toISOString(),
+      });
+    }
+
     navigate(-1);
   };
 
@@ -64,6 +99,12 @@ export default function AddTransaction() {
           >
             {type === "given" ? "You Gave" : "You Got"}
           </div>
+
+          {confirmationMode === "STRICT" && (
+            <div className="text-[11px] text-yellow-700 mt-1">
+              This transaction requires confirmation
+            </div>
+          )}
         </div>
 
         {/* AMOUNT */}
@@ -93,18 +134,13 @@ export default function AddTransaction() {
         {/* DATE & CAMERA */}
         <div className="px-4 py-4 flex items-center justify-between border-b border-yellow-300">
 
-          {/* DATE ICON */}
-          <label className="flex items-center cursor-pointer">
-            
-            <input
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              className="bg-transparent outline-none"
-            />
-          </label>
+          <input
+            type="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            className="bg-transparent outline-none"
+          />
 
-          {/* CAMERA ICON */}
           <div className="flex items-center">
             <input
               type="file"
