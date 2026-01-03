@@ -21,9 +21,9 @@ export default function App() {
         
       ) : ( */}
         <>
-        <Route path="/" element={<Navigate to="/ledger-home" />} />
+        
         <Route path="/login" element={<Login onLogin={setUser} />} />
-        <Route path="/ledger-home" element={<LedgerHome />} />
+        <Route path="/" element={<LedgerHome />} />
           <Route path="/add-customer" element={<AddCustomer onAdd={addCustomer} />} />
           <Route path="/customer/:id" element={<CustomerLedger />} />
           <Route
